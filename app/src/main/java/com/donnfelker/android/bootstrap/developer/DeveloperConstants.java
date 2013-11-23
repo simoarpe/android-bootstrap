@@ -6,4 +6,5 @@ package com.donnfelker.android.bootstrap.developer;
 public class DeveloperConstants {
 
     public static final boolean LOGGING_ENABLED = true;
+    public static final boolean PREFILL_LOGIN = true;
 }
