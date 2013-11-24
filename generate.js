@@ -3,7 +3,8 @@ var wrench = require('wrench'),
     spawn = require('child_process').spawn,
     fs = require('fs'),
     async = require('async'),
-    zip = require("node-native-zip");
+    zip = require("node-native-zip"),
+    fsExtra = require('fs-extra');
 /*
  * Project generator route. 
  * This entire route is super brute force and rather naive. However, it works and is easy to follow. 
@@ -44,7 +45,13 @@ function main() {
     var sourceDir = process.env.PWD + '/android-bootstrap';
     
     // Temporary locationwhere the users project will be generated.
+    var tempDir = process.env.PWD + '/tmp/';
     var destDir = process.env.PWD + '/tmp/' + packageName; 
+
+  if(fs.existsSync(tempDir)) {
+  removeTemp(tempDir);
+}
+createTemp(tempDir);
 
     console.log("sourceDir: " + sourceDir);
     console.log("destDir: " + destDir); 
@@ -56,6 +63,17 @@ function main() {
     var theFiles = wrench.readdirSyncRecursive(destDir, {excludeHiddenUnix : true /* See sync version */});
 
     var callItems = [];
+
+   
+  fsExtra.copy(sourceDir + '/.gitignore', destDir + '/.gitignore', function(err){
+   console.log("copying .gitignore");
+
+  if (err) {
+    console.log(".gitignore not found");
+    return console.error(err);
+  }
+  console.log(".gitignore copied!")
+  });
 
     console.log("theFiles: " + theFiles);
     theFiles.forEach(function(currentFile) {
@@ -81,6 +99,16 @@ function main() {
 
       }
     }); 
+}
+
+function removeTemp(tempDir){
+   console.log("Removing Temp");
+   fsExtra.removeSync(tempDir)
+}
+
+function createTemp(tempDir){
+  console.log("Creating Temp");
+  fsExtra.mkdirsSync(tempDir);
 }
 
 function sendContentAsZip(destDir, res) {
@@ -213,7 +241,7 @@ function copySourceDirectories(destDir, packageName) {
 
   console.log(destDir);
   console.log(packageName);
-  var fs = require('fs-extra'); //var fs = require('fs')
+  
   
   var newPathChunk = getNewFilePath(packageName);
 
@@ -221,7 +249,7 @@ function copySourceDirectories(destDir, packageName) {
   var newSourceDir = destDir    +  "/app/src/main/java/" + newPathChunk; 
   console.log("Copying source from" + oldSourceDir + " to directory " + newSourceDir);
   //wrench.copyDirSyncRecursive(oldSourceDir, newSourceDir); 
-  fs.copy(oldSourceDir, newSourceDir, function (err) {
+  fsExtra.copy(oldSourceDir, newSourceDir, function (err) {
   if (err) {
     console.error(err);
   } else {
@@ -234,7 +262,7 @@ function copySourceDirectories(destDir, packageName) {
   var newUnitTestDir = destDir + "/app/src/test/java/" + newPathChunk; 
   console.log("Copying source from" + oldUnitTestDir + " to directory " + newUnitTestDir);
   //wrench.copyDirSyncRecursive(oldUnitTestDir, newUnitTestDir); 
-    fs.copy(oldUnitTestDir, newUnitTestDir, function (err) {
+    fsExtra.copy(oldUnitTestDir, newUnitTestDir, function (err) {
   if (err) {
     console.error(err);
   } else {
@@ -247,7 +275,7 @@ function copySourceDirectories(destDir, packageName) {
   var newIntegrationTestDir = destDir + "/integration-tests/src/main/java/" + newPathChunk; 
   console.log("Copying source from" + oldIntegrationTestDir + " to directory " + newIntegrationTestDir);
  // wrench.copyDirSyncRecursive(oldIntegrationTestDir, newIntegrationTestDir);     
-   fs.copy(oldIntegrationTestDir, newIntegrationTestDir, function (err) {
+   fsExtra.copy(oldIntegrationTestDir, newIntegrationTestDir, function (err) {
   if (err) {
     console.error(err);
   } else {
