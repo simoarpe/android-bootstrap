@@ -73,7 +73,9 @@ function main() {
         // Now, all items have been executed, perform the copying/etc.
         createSourceDirectories(destDir, packageName);
         copySourceDirectories(destDir, packageName); 
-        removeBootstrapDirectories(destDir); 
+        
+        //moved inside copySource method
+        //removeBootstrapDirectories(destDir); 
         
         //sendContentAsZip(destDir, res);
 
@@ -147,6 +149,48 @@ function removeBootstrapDirectories(destDir) {
 
 }
 
+function removeBootstrapSourceDir(destDir) {
+
+  // TODO: remove the old bootstrap source, unit-test and integration-test folders that are not valid anymore.
+  console.log("Removing temporary work directories.");
+  
+  // Clean up - delete all the files we were just working with. 
+  var bootstrapSourceDir = destDir + "/app/src/main/java/com/donnfelker"; 
+
+  console.log("Removing: " + bootstrapSourceDir);
+  
+  wrench.rmdirSyncRecursive(bootstrapSourceDir, false);
+
+}
+
+function removeBootstrapUnitTestDir(destDir) {
+
+  // TODO: remove the old bootstrap source, unit-test and integration-test folders that are not valid anymore.
+  console.log("Removing temporary work directories.");
+  
+  // Clean up - delete all the files we were just working with. 
+  var bootstrapUnitTestDir = destDir + "/app/src/test/java/com/donnfelker"; 
+
+  console.log("Removing: " + bootstrapUnitTestDir);
+
+  wrench.rmdirSyncRecursive(bootstrapUnitTestDir, false);
+
+}
+
+function removeIntegrationTestDir(destDir) {
+
+  // TODO: remove the old bootstrap source, unit-test and integration-test folders that are not valid anymore.
+  console.log("Removing temporary work directories.");
+  
+  // Clean up - delete all the files we were just working with. 
+  var integrationTestDir = destDir +  "/integration-tests/src/main/java/com/donnfelker"; 
+
+  console.log("Removing: " + integrationTestDir);
+  
+  wrench.rmdirSyncRecursive(integrationTestDir, false);
+
+}
+
 // Creates the various new folder structures needed for the users new project. 
 function createSourceDirectories(destDir, packageName) {
 
@@ -169,23 +213,48 @@ function copySourceDirectories(destDir, packageName) {
 
   console.log(destDir);
   console.log(packageName);
+  var fs = require('fs-extra'); //var fs = require('fs')
   
   var newPathChunk = getNewFilePath(packageName);
 
   var oldSourceDir = destDir  +  "/app/src/main/java/com/donnfelker/android/bootstrap";  
   var newSourceDir = destDir    +  "/app/src/main/java/" + newPathChunk; 
   console.log("Copying source from" + oldSourceDir + " to directory " + newSourceDir);
-  wrench.copyDirSyncRecursive(oldSourceDir, newSourceDir); 
+  //wrench.copyDirSyncRecursive(oldSourceDir, newSourceDir); 
+  fs.copy(oldSourceDir, newSourceDir, function (err) {
+  if (err) {
+    console.error(err);
+  } else {
+    console.log("success!");
+    removeBootstrapSourceDir(destDir);
+  }
+}); //copies directory, even if it has subdirectories or files
 
   var oldUnitTestDir = destDir + "/app/src/test/java/com/donnfelker/android/bootstrap";
   var newUnitTestDir = destDir + "/app/src/test/java/" + newPathChunk; 
   console.log("Copying source from" + oldUnitTestDir + " to directory " + newUnitTestDir);
-  wrench.copyDirSyncRecursive(oldUnitTestDir, newUnitTestDir); 
+  //wrench.copyDirSyncRecursive(oldUnitTestDir, newUnitTestDir); 
+    fs.copy(oldUnitTestDir, newUnitTestDir, function (err) {
+  if (err) {
+    console.error(err);
+  } else {
+    console.log("success!");
+    removeBootstrapUnitTestDir(destDir);
+  }
+}); //copies directory, even if it has subdirectories or files
 
   var oldIntegrationTestDir = destDir + "/integration-tests/src/main/java/com/donnfelker/android/bootstrap";
   var newIntegrationTestDir = destDir + "/integration-tests/src/main/java/" + newPathChunk; 
   console.log("Copying source from" + oldIntegrationTestDir + " to directory " + newIntegrationTestDir);
-  wrench.copyDirSyncRecursive(oldIntegrationTestDir, newIntegrationTestDir);     
+ // wrench.copyDirSyncRecursive(oldIntegrationTestDir, newIntegrationTestDir);     
+   fs.copy(oldIntegrationTestDir, newIntegrationTestDir, function (err) {
+  if (err) {
+    console.error(err);
+  } else {
+    console.log("success!");
+    removeIntegrationTestDir(destDir);
+  }
+}); //copies directory, even if it has subdirectories or files
 }
 
 String.prototype.endsWith = function(suffix) {
